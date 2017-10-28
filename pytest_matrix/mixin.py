@@ -21,7 +21,7 @@ class MatrixTestBase(type):
         return manually_setted
 
     def __new__(mcs, name, bases, dct):
-        is_mixin = MatrixTestMixin.is_mixin(dct, bases)
+        is_mixin = mcs.is_mixin(dct, bases)
         is_test_case = not is_mixin
         dct['is_mixin'] = is_mixin
         new_cls = super().__new__(mcs, name, bases, dct)

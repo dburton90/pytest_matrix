@@ -24,9 +24,5 @@ setup(name="pytest_matrix",
       ],
       keywords='pytest mixin pytest_matrix generating tests',
       zip_safe=False,
-      entrypoints={
-          'pytest11': [
-              'pytest_matrix = pytest_matrix.plugin'
-          ]
-      }
+      entry_points={'pytest11': ['matrix = pytest_matrix.plugin']}
       )

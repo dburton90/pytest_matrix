@@ -8,6 +8,7 @@ Base usecase:
 =============
 
 .. code:: Python
+
     import pytest
     from pytest_matrix import TestMatrixMixin
     from myproject import my_func
