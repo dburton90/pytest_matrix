@@ -5,11 +5,11 @@ setup(name="pytest_matrix",
       version=0.1,
       description='Provide tools for generating tests from combinations of fixtures.',
       long_description='This plugin provide simple way how to generate multiple test from combinations of setup data.',
-      url="https://github.com/dburton90/pytest_mixin.git",
+      url="https://github.com/dburton90/pytest_matrix.git",
       author="Daniel Bartoň",
       author_email='daniel.barton@seznam.cz',
       license='GPLv3',
-      packages=['pytest_mixin'],
+      packages=['pytest_matrix'],
       install_requires=[
           'pytest'
       ],
@@ -22,6 +22,11 @@ setup(name="pytest_matrix",
           'Programming Language :: Python :: 3 :: Only',
           'Topic :: Software Development :: Libraries',
       ],
-      keywords='pytest mixin pytest_mixin generating tests',
-      zip_safe=False
+      keywords='pytest mixin pytest_matrix generating tests',
+      zip_safe=False,
+      entrypoints={
+          'pytest11': [
+              'pytest_matrix = pytest_matrix.plugin'
+          ]
+      }
       )
