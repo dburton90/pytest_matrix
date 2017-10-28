@@ -43,5 +43,5 @@ Base usecase:
 
 This will generate tests:
 -------------------------
-[*] MyTestCase::test_my_fn[arg_first_val_1|arg_second|result]
-[*] MyTestCase::test_my_fn[arg_first_val_2|arg_second|result]
+- MyTestCase::test_my_fn[arg_first_val_1|arg_second|result]
+- MyTestCase::test_my_fn[arg_first_val_2|arg_second|result]
