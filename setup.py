@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name="pytest_matrix",
-      version=0.1,
+      version=0.2,
       description='Provide tools for generating tests from combinations of fixtures.',
       long_description='This plugin provide simple way how to generate multiple test from combinations of setup data.',
       url="https://github.com/dburton90/pytest_matrix.git",
@@ -15,7 +15,7 @@ setup(name="pytest_matrix",
           'pytest-lazy-fixture'
       ],
       classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'Environment :: Plugins',
           'Framework :: Pytest',
           'Intended Audience :: Developers',
