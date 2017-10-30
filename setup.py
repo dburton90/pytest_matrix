@@ -11,7 +11,8 @@ setup(name="pytest_matrix",
       license='GPLv3',
       packages=['pytest_matrix'],
       install_requires=[
-          'pytest'
+          'pytest',
+          'pytest-lazy-fixture'
       ],
       classifiers=[
           'Development Status :: 3 - Alpha',
