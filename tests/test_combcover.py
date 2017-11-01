@@ -260,6 +260,7 @@ def test_invalid_fixture_names(names):
             ]
 
 
+@pytest.mark.skip("Not implemented yet.")
 @pytest.mark.parametrize(argnames=['names'],
                          argvalues=[
                              (('a', 'b', 'y'), ),

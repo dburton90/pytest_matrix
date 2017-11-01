@@ -1,3 +1,4 @@
 -e .
 pytest
-
+codecov
+pytest-cov

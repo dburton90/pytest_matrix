@@ -4,15 +4,6 @@ class PytestMatrixException(Exception):
     pass
 
 
-class FixturesNamesMissing(PytestMatrixException):
-    def __init__(self, class_name, function_name):
-        from .mixin import MatrixTestBase
-        function_name = function_name.upper()
-        msg = ("Missing in {function_name}{MatrixTestBase.FIXTURE_NAMES_SUFFIX} in testing class "
-               "'{class_name}'")
-        super().__init__(msg.format_map(vars()))
-
-
 class FixturesCombinationsMissing(PytestMatrixException):
     def __init__(self, class_name, function_name):
         from .mixin import MatrixTestBase

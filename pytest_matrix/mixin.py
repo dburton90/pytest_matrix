@@ -116,23 +116,6 @@ class MatrixTestBase(type):
                 return False
         return True
 
-    def get_parametrize_data(cls, function_name, real_fixture_names):
-        if not function_name.startswith(cls.TEST_FUNCTION_PREFIX):
-            raise ValueError("Test name in class {cls.__name__} must start with {cls.TEST_FUNCTION_PREFIX}."
-                             " Invalid name: {function_name}".format_map(vars()))
-        function_name = function_name[len(cls.TEST_FUNCTION_PREFIX):].upper()
-        grouper = getattr(cls, function_name + cls.FIXTURE_SUFFIX)
-        grouper_fixture_names = set(grouper.fixture_names)
-        all_fixture_names = set(real_fixture_names).union(grouper_fixture_names)
-        extra = grouper_fixture_names.difference(all_fixture_names) or False
-        ids, fixtures = zip(*grouper.generate_fixtures_with_ids())
-        return {
-            'argnames': grouper.fixture_names,
-            'argvalues': fixtures,
-            'ids': ids,
-            'indirect': extra
-        }
-
     @staticmethod
     def validate_fixture_combinations(class_name, test_name, fixture_names, fixture_combinations):
         for g in fixture_combinations:
@@ -210,17 +193,6 @@ class FixtureGrouper(list):
             ids, fixtures = zip(*((name, pytest.lazy_fixture(name)) for name in comb))
             ids = "|".join(ids)
             yield ids, fixtures
-
-    def missing_combinations(self):
-        unique_items = defaultdict(set)
-        existing_combinations = set()
-        for comb in self:
-            for arg_position, arg in enumerate(comb):
-                unique_items[arg_position].add(arg)
-            existing_combinations.add(comb)
-        unique_items.default_factory = None
-        all_combinations = set(itertools.product(*unique_items.values()))
-        return all_combinations.difference(existing_combinations)
 
     def __add__(self, other):
         return FixtureGrouper(self.fixture_names, super().__add__(other))
