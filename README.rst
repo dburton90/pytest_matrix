@@ -10,6 +10,41 @@ Quickstart:
 .. code:: Python
 
     import pytest
+    from myproject import my_func
+
+        @pytest.mark.matrix(names=['arg_firs'],
+                            combs=[
+                                    {
+                                       'arg_first': ['val_1', 'val_2'],
+                                    },
+                                   ])
+        def test_my_fn(self, arg_first, arg_second, result):
+            assert my_function(arg_first, arg_second) == result
+
+
+        @pytest.fixture
+        def arg_first_val_1(self):
+            return 'val_1'
+
+        @pytest.fixture
+        def arg_first_val_2(self):
+            return 'val_2'
+
+        @pytest.fixture
+        def arg_second(self):
+            return 'val'
+
+        @pytest.fixture
+        def result(self, arg_first, arg_second):
+            # prepare expected result base on arg_first and arg_second fixture
+            # in each test the arg_first parameter will have different value
+            return ...
+
+**OR**
+
+.. code:: Python
+
+    import pytest
     from pytest_matrix import TestMatrixMixin
     from myproject import my_func
 
@@ -43,12 +78,16 @@ Quickstart:
             # in each test the arg_first parameter will have different value
             return ...
 
-Please notice **result** fixture and **arg_first** fixture. There is no **arg_first** fixture definition, the **arg_first** is created by py.test during test generation and you get access to current value of **arg_first**, same as test function receive.
-
 This will generate tests:
 -------------------------
 - MyTestCase::test_my_fn[arg_first_val_1|arg_second|result]
 - MyTestCase::test_my_fn[arg_first_val_2|arg_second|result]
+
+
+Both examples are equal. But in class you have better scope controlling and other options.
+
+Please notice **result** fixture and **arg_first** fixture. There is no **arg_first** fixture definition, the **arg_first** is created by py.test during test generation and you get access to current value of **arg_first**, same as test function receive.
+
 
 
 Test Data
