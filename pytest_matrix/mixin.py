@@ -39,10 +39,8 @@ class MatrixTestBase(type):
                     fixture_combinations = MatrixTestBase.get_raw_fixtures_data(dct, test_name)
                 except KeyError:
                     raise exceptions.FixturesCombinationsMissing(name, test_name)
-                combinator = FixtureGrouper(fixture_names, fixture_combinations)
-                combinator.validate(name, test_name)
-                all_groupers[test_name] = combinator
-                setattr(new_cls, test_name.upper() + mcs.FIXTURE_SUFFIX, combinator)
+                MatrixTestBase.validate_fixture_combinations(name, test_name, fixture_names, fixture_combinations)
+                all_groupers[test_name] = fixture_combinations
             new_cls.set_combinations_method(all_groupers)
 
         return new_cls
@@ -58,9 +56,10 @@ class MatrixTestBase(type):
 
     def set_combinations_method(cls, all_groupers):
         all_fixtures = defaultdict(set)
-        for grouper in all_groupers.values():
-            for fixture_name in grouper.fixture_names:
-                all_fixtures[fixture_name].update(set(grouper.get_fixture_types(fixture_name)))
+        for fixtures_combination in all_groupers.values():
+            for group in fixtures_combination:
+                for fixture_name, types in group.items():
+                    all_fixtures[fixture_name].update(set(types))
         all_fixtures.default_factory = None
 
         for comb_conf in cls.COMBINATIONS_COVER:
@@ -76,7 +75,8 @@ class MatrixTestBase(type):
             def wrapper(fixture_names, test_functions, scope):
                 def test_combocover(self):
                     filtered_groups = [all_groupers[name] for name in test_functions]
-                    selected_groups = sum(filtered_groups, FixtureGrouper(fixture_names))
+                    selected_groups = sum(filtered_groups[1:], filtered_groups[0])
+                    selected_groups = FixtureGrouper(fixture_names, selected_groups)
                     if scope == cls.FUNCTIONS_SCOPE:
                         group_expected = {fixture_name: selected_groups.get_fixture_types(fixture_name)
                                           for fixture_name in fixture_names}
@@ -131,6 +131,15 @@ class MatrixTestBase(type):
             'ids': ids,
             'indirect': extra
         }
+
+    @staticmethod
+    def validate_fixture_combinations(class_name, test_name, fixture_names, fixture_combinations):
+        for g in fixture_combinations:
+            if set(g.keys()) != set(fixture_names):
+                extra = set(g.keys()).difference(set(fixture_names))
+                missing = set(fixture_names).difference(set(g.keys()))
+                raise exceptions.InvalidFixturesCombinationsKeys(class_name, test_name,
+                                                                 fixture_names, extra, missing)
 
 
 class TestMatrixMixin(metaclass=MatrixTestBase):
@@ -215,14 +224,6 @@ class FixtureGrouper(list):
     def __add__(self, other):
         return FixtureGrouper(self.fixture_names, super().__add__(other))
 
-    def validate(self, class_name, function_name):
-        for g in super().__iter__():
-            if set(g.keys()) != set(self.fixture_names):
-                extra = set(g.keys()).difference(set(self.fixture_names))
-                missing = set(self.fixture_names).difference(set(g.keys()))
-                raise exceptions.InvalidFixturesCombinationsKeys(class_name, function_name,
-                                                                 self.fixture_names, extra, missing)
-
     def get_fixture_types(self, fixture_name, with_fixture_name=False):
         return set(itertools.chain(*(conf[fixture_name] for conf in super().__iter__())))
 
@@ -232,6 +233,17 @@ class FixtureGrouper(list):
         self_combs = set("[" + ids + "]" for ids, _ in self.generate_fixtures_with_ids())
         return self_combs.difference(other_combs)
 
+    def get_parametrize_data(self, real_fixture_names):
+        grouper_fixture_names = set(self.fixture_names)
+        all_fixture_names = set(real_fixture_names).union(grouper_fixture_names)
+        extra = grouper_fixture_names.difference(all_fixture_names) or False
+        ids, fixtures = zip(*self.generate_fixtures_with_ids())
+        return {
+            'argnames': self.fixture_names,
+            'argvalues': fixtures,
+            'ids': ids,
+            'indirect': extra
+        }
 
 
 def generate_single_group_name_combinations(group, fixture_names):

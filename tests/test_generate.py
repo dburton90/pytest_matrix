@@ -56,6 +56,56 @@ def test_generate(testdir):
     assert expected_functions == collected_tests
 
 
+def test_generate_from_marker(testdir):
+
+    # create a temporary pytest test file
+    source = """
+    import pytest
+    from pytest_matrix import TestMatrixMixin
+    
+    
+    def my_func(a, b):    
+        return a + b
+    
+    @pytest.mark.matrix(names=['arg_first'], combs=[
+            {
+                'arg_first': ['val_a', 'val_b']
+            }
+        ])
+    def test_my_fn(arg_first, arg_second, result):
+        assert my_func(arg_first, arg_second) == result
+
+    @pytest.fixture
+    def arg_first_val_a():
+        return 'val_1'
+
+    @pytest.fixture
+    def arg_first_val_b():
+        return 'val_2'
+
+    @pytest.fixture
+    def arg_second():
+        return 'val'
+
+    @pytest.fixture
+    def result(arg_first, arg_second):
+        return arg_first + arg_second
+    """
+    testdir.makepyfile(source)
+    result = testdir.runpytest()
+
+    result.assert_outcomes(passed=2)
+
+    expected_functions = {
+        'test_my_fn[arg_first_val_a]',
+        'test_my_fn[arg_first_val_b]',
+    }
+    items = testdir.getitems(source)
+    collected_tests = {f.name for f in items}
+
+    assert expected_functions == collected_tests
+
+
 
 
 def test_missing_fixture_names():
