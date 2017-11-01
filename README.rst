@@ -3,6 +3,12 @@ Pytest Matrix
 
 This plugin provide simple way how to generate multiple test from combinations from setup data.
 
+Instalition
+-----------
+
+.. code:: Bash
+    pip install pytest_matrix
+
 
 Quickstart:
 =============
