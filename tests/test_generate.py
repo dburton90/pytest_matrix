@@ -178,20 +178,14 @@ def test_skip(testdir):
         def y_x(self):
             pass
     """
-    testdir.makepyfile(source)
-    result = testdir.runpytest()
+    path = testdir.makepyfile(source)
+    result = testdir.runpytest("{path}".format_map(vars()))
 
     result.assert_outcomes(skipped=1, passed=1)
 
     items = testdir.getitems(source)
     assert {(f.name, f.cls.__name__) for f in items} == {('test_fn[y_x]', 'TestOtherTest'),
                                                          ('test_fn', "TestFirst")}
-
-
-
-
-
-
 
 
 

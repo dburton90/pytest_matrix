@@ -17,16 +17,11 @@ def pytest_itemcollected(item):
     if isinstance(item.cls, MatrixTestBase) and item.name in item.cls.SKIP_TESTS:
         item.add_marker(pytest.mark.skip())
 
-# # def pytest_collection_modifyitems(session, config, items):
-# #     if isinstance(item.cls, MatrixTestBase) and item.name in item.cls.exclude_tests:
-# #         item.add_marker(pytest.mark.skip(msg="This test has no fixture data."))
-#
-#
+
 def pytest_pycollect_makeitem(collector, name, obj):
-    """ prevent collect anything from mixin class """
-    # if isinstance(obj, MatrixTestBase):
-    #     Class = collector._getcustomclass("Class")
-    #     return Class(name, parent=collector)
-    if isinstance(collector.cls, MatrixTestBase) and collector.cls.IS_MIXIN:
-        return []
+    """ prevent collect anything from mixin class and do not collect inherited combocover tests """
+    if isinstance(collector.cls, MatrixTestBase):
+        if collector.cls.IS_MIXIN or (name.startswith('test_combocover')
+                                      and name not in collector.cls.COMBINATIONS_COVER_TESTS):
+            return []
 

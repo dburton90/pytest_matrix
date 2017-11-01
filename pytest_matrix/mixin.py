@@ -24,18 +24,17 @@ class MatrixTestBase(type):
         manually_setted = dct.get('is_mixin', False)
         return manually_setted
 
-    @staticmethod
-    def update_dict(dct):
+    def __new__(mcs, name, bases, dct):
         dct.setdefault('IS_MIXIN', [])
         dct.setdefault('SKIP_TESTS', [])
         dct.setdefault('NOT_GENERATE_TESTS', [])
-
-    def __new__(mcs, name, bases, dct):
-        mcs.update_dict(dct)
+        dct.setdefault('COMBINATIONS_COVER', [])
+        dct.setdefault('COMBINATIONS_COVER_TESTS', [])
         new_cls = super().__new__(mcs, name, bases, dct)
         is_test_case = not new_cls.IS_MIXIN
         if is_test_case:
             test_names = new_cls.get_cleaned_test_names()
+            all_groupers = {}
             for test_name in test_names:
                 try:
                     fixture_names = MatrixTestBase.get_fixtures_names(dct, test_name)
@@ -47,7 +46,9 @@ class MatrixTestBase(type):
                     raise exceptions.FixturesCombinationsMissing(name, test_name)
                 combinator = FixtureGrouper(fixture_names, fixture_combinations)
                 combinator.validate(name, test_name)
+                all_groupers[test_name] = combinator
                 setattr(new_cls, test_name.upper() + mcs.FIXTURE_SUFFIX, combinator)
+            new_cls.set_combinations_method(all_groupers)
 
         return new_cls
 
@@ -60,18 +61,31 @@ class MatrixTestBase(type):
         skip_tests = (att for att in test_names if cls.should_be_parametrize(att))
         return [att[prefix_len:] for att in skip_tests]
 
-    def set_combinations_method(cls, all_fixtures):
-        def test_all_combinations_used(self):
-            all_combinations = all_fixtures
-            if len(all_combinations) > 1:
-                all_combinations = reduce(lambda x, y: x + y, all_combinations)
-            else:
-                all_combinations = all_combinations[0]
-            missing_combinations = all_combinations.missing_combinations()
-            assert not any(missing_combinations), ("Missing combinations:\n"
-                                                   + "\n".join(map(str, missing_combinations)))
+    def set_combinations_method(cls, all_groupers):
+        for comb_conf in cls.COMBINATIONS_COVER:
+            f_names = comb_conf['fixture_names']
+            t_functions = comb_conf['fixture_functions']
 
-        cls.test_all_combinations_used = test_all_combinations_used
+            test_name = "test_combocover_{test_functions}_{fixture_names}".format(
+                test_functions="_".join(t_functions),
+                fixture_names="_".join(f_names)
+            )
+
+            def wrapper(fixture_names, test_functions):
+                def test_combocover(self):
+                    filtered_groups = [all_groupers[name] for name in test_functions]
+                    selected_groups = sum(filtered_groups, FixtureGrouper(fixture_names))
+                    group_expected = {fixture_name: selected_groups.get_fixture_types(fixture_name)
+                                      for fixture_name in fixture_names}
+                    all_combs_grouper = FixtureGrouper(fixture_names, [group_expected])
+
+                    difference = all_combs_grouper.difference(selected_groups)
+                    assert not any(difference), "Missing combinations:\n" + '\n'.join(difference)
+                test_combocover.__name__ = test_name
+                test_combocover._combocover = True
+                return test_combocover
+            setattr(cls, test_name, wrapper(f_names, t_functions))
+            cls.COMBINATIONS_COVER_TESTS.append(test_name)
 
     @staticmethod
     def get_fixtures_names(dct, function_name):
@@ -86,7 +100,14 @@ class MatrixTestBase(type):
         return values
 
     def should_be_parametrize(cls, function_name):
-        return function_name not in itertools.chain(cls.SKIP_TESTS, cls.NOT_GENERATE_TESTS)
+        if function_name in cls.SKIP_TESTS:
+            return False
+        if function_name in cls.NOT_GENERATE_TESTS:
+            return False
+        if function_name.startswith('test_combocover'):
+            if getattr(getattr(cls, function_name), '_combocover', False):
+                return False
+        return True
 
     def get_parametrize_data(cls, function_name, real_fixture_names):
         if not function_name.startswith(cls.TEST_FUNCTION_PREFIX):
@@ -104,9 +125,6 @@ class MatrixTestBase(type):
             'ids': ids,
             'indirect': extra
         }
-
-
-
 
 
 class TestMatrixMixin(metaclass=MatrixTestBase):
@@ -168,13 +186,12 @@ class FixtureGrouper(list):
     def __delitem__(self, key):
         raise NotImplementedError()
 
-    def __iter__(self):
-        for g in super().__iter__():
-            yield from generate_single_group_name_combinations(g, self.fixture_names)
-
-    def generate_fixtures_with_ids(self):
-        for fixture_names in self:
-            ids, fixtures = zip(*((name, pytest.lazy_fixture(name)) for name in fixture_names))
+    def generate_fixtures_with_ids(self, fixture_names=None):
+        fixture_names = fixture_names or self.fixture_names
+        fixture_combs = itertools.chain(*(generate_single_group_name_combinations(g, fixture_names)
+                                          for g in super().__iter__()))
+        for comb in fixture_combs:
+            ids, fixtures = zip(*((name, pytest.lazy_fixture(name)) for name in comb))
             ids = "|".join(ids)
             yield ids, fixtures
 
@@ -200,6 +217,16 @@ class FixtureGrouper(list):
                 raise exceptions.InvalidFixturesCombinationsKeys(class_name, function_name,
                                                                  self.fixture_names, extra, missing)
 
+    def get_fixture_types(self, fixture_name, with_fixture_name=False):
+        return set(itertools.chain(*(conf[fixture_name] for conf in super().__iter__())))
+
+    def difference(self, other_fixture_grouper):
+        assert other_fixture_grouper.fixture_names == self.fixture_names
+        other_combs = set("[" + ids + "]" for ids, _ in other_fixture_grouper.generate_fixtures_with_ids())
+        self_combs = set("[" + ids + "]" for ids, _ in self.generate_fixtures_with_ids())
+        return self_combs.difference(other_combs)
+
+
 
 def generate_single_group_name_combinations(group, fixture_names):
     """
@@ -210,8 +237,12 @@ def generate_single_group_name_combinations(group, fixture_names):
              'a': ["x", "y"]
              }
 
-    :return: (('a_x', 'y_A'), ('a_x', 'y_B'), ('a_x', 'y_C'),
-              ('a_y', 'y_A'), ('a_y', 'y_B'), ('a_y', 'y_C'),
+    :return: (('a_x', 'y_A'),
+              ('a_x', 'y_B'),
+              ('a_x', 'y_C'),
+              ('a_y', 'y_A'),
+              ('a_y', 'y_B'),
+              ('a_y', 'y_C'),
               )
     """
     ordered_groups = (tuple("%s_%s" % (name, item) for item in group[name])
