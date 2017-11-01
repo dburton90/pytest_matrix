@@ -32,13 +32,14 @@ class MatrixTestBase(type):
             all_groupers = {}
             for test_name in test_names:
                 try:
-                    fixture_names = MatrixTestBase.get_fixtures_names(dct, test_name)
-                except KeyError:
-                    raise exceptions.FixturesNamesMissing(name, test_name)
-                try:
                     fixture_combinations = MatrixTestBase.get_raw_fixtures_data(dct, test_name)
                 except KeyError:
                     raise exceptions.FixturesCombinationsMissing(name, test_name)
+                try:
+                    fixture_names = MatrixTestBase.get_fixtures_names(dct, test_name)
+                except KeyError:
+                    fixture_names = extract_fixture_names(fixture_combinations)
+                    setattr(new_cls, test_name.upper() + MatrixTestBase.FIXTURE_NAMES_SUFFIX, fixture_names)
                 MatrixTestBase.validate_fixture_combinations(name, test_name, fixture_names, fixture_combinations)
                 all_groupers[test_name] = fixture_combinations
             new_cls.set_combinations_method(all_groupers)
@@ -267,3 +268,7 @@ def generate_single_group_name_combinations(group, fixture_names):
                       for name in fixture_names)
     return itertools.product(*ordered_groups)
 
+
+def extract_fixture_names(fixture_combinations):
+    keys = fixture_combinations[0].keys()
+    return list(keys)

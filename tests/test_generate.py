@@ -109,13 +109,13 @@ def test_generate_from_marker(testdir):
 
 
 def test_missing_fixture_names():
-    with pytest.raises(exceptions.FixturesNamesMissing):
-        class Test(TestMatrixMixin):
+    class Test(TestMatrixMixin):
 
-            FN_FIXTURES = [{'x': ['x']}]
+        FN_FIXTURES = [{'x': ['x']}]
 
-            def test_fn(self):
-                pass
+        def test_fn(self):
+            pass
+    assert Test.FN_FIXTURES_NAMES == ['x']
 
 
 def test_missing_fixtures_definition():
@@ -129,15 +129,16 @@ def test_missing_fixtures_definition():
 
 
 def test_missing_fixture_names_inherited():
-    with pytest.raises(exceptions.FixturesNamesMissing):
-        class TestMixin(TestMatrixMixin):
-            IS_MIXIN = True
+    class TestMixin(TestMatrixMixin):
+        IS_MIXIN = True
 
-            def test_fn(self):
-                pass
+        def test_fn(self):
+            pass
 
-        class Test(TestMixin):
-            FN_FIXTURES = [{'x': ['x']}]
+    class Test(TestMixin):
+        FN_FIXTURES = [{'x': ['x']}]
+
+    assert Test.FN_FIXTURES_NAMES == ['x']
 
 
 def test_missing_fixtures_definition_inherited():

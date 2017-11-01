@@ -100,6 +100,7 @@ You must define them in every class (they are not inherited).
 
 MY_FUNCTION_FIXTURES_NAMES:
 ---------------------------
+- they are not required, it just could be little bit clearer some times, because you can choose order (the way how test name will be generated)
 - list of names of fixtures to be combined in test
 - you can define fixtures, which **ARE NOT** defined in test as parameter, these fixtures will be
   stored in request.param and also it will be accessible by other fixtures
@@ -205,7 +206,7 @@ IS_MIXIN
 You can define tests in separate class and reuse them in multiple other class. You usually don't want to collect these tests and run them. So you can add class attribute **IS_MIXIN = True** and tests in this class
 will not be collected by pytest.
 
-If you use some of these mixins you have to define **_FIXTURES_NAMES** and **_FIXTURES** for each test. It could happen, that you won't use some of the tests, or you do not want generate from some of the tests.
+If you use some of these mixins you have to define **_FIXTURES** for each test. It could happen, that you won't use some of the tests, or you do not want generate from some of the tests.
 
 SKIP_TEST
 ---------
