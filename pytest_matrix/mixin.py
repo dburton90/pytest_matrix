@@ -16,13 +16,8 @@ class MatrixTestBase(type):
     TEST_FUNCTION_PREFIX = 'test_'
     HIDDEN_TEST_FUNCTION_PREFIX = '__test_'
 
-    @staticmethod
-    def is_mixin(dct, bases):
-        """
-        check if the 'is_mixin' attribute is manually setted to concrete class
-        """
-        manually_setted = dct.get('is_mixin', False)
-        return manually_setted
+    CLASS_SCOPE = 'class'
+    FUNCTIONS_SCOPE = 'functions'
 
     def __new__(mcs, name, bases, dct):
         dct.setdefault('IS_MIXIN', [])
@@ -62,21 +57,32 @@ class MatrixTestBase(type):
         return [att[prefix_len:] for att in skip_tests]
 
     def set_combinations_method(cls, all_groupers):
+        all_fixtures = defaultdict(set)
+        for grouper in all_groupers.values():
+            for fixture_name in grouper.fixture_names:
+                all_fixtures[fixture_name].update(set(grouper.get_fixture_types(fixture_name)))
+        all_fixtures.default_factory = None
+
         for comb_conf in cls.COMBINATIONS_COVER:
             f_names = comb_conf['fixture_names']
             t_functions = comb_conf['fixture_functions']
+            test_scope = comb_conf.get('scope', cls.CLASS_SCOPE)
 
             test_name = "test_combocover_{test_functions}_{fixture_names}".format(
                 test_functions="_".join(t_functions),
                 fixture_names="_".join(f_names)
             )
 
-            def wrapper(fixture_names, test_functions):
+            def wrapper(fixture_names, test_functions, scope):
                 def test_combocover(self):
                     filtered_groups = [all_groupers[name] for name in test_functions]
                     selected_groups = sum(filtered_groups, FixtureGrouper(fixture_names))
-                    group_expected = {fixture_name: selected_groups.get_fixture_types(fixture_name)
-                                      for fixture_name in fixture_names}
+                    if scope == cls.FUNCTIONS_SCOPE:
+                        group_expected = {fixture_name: selected_groups.get_fixture_types(fixture_name)
+                                          for fixture_name in fixture_names}
+                    else:
+                        group_expected = all_fixtures
+
                     all_combs_grouper = FixtureGrouper(fixture_names, [group_expected])
 
                     difference = all_combs_grouper.difference(selected_groups)
@@ -84,7 +90,7 @@ class MatrixTestBase(type):
                 test_combocover.__name__ = test_name
                 test_combocover._combocover = True
                 return test_combocover
-            setattr(cls, test_name, wrapper(f_names, t_functions))
+            setattr(cls, test_name, wrapper(f_names, t_functions, test_scope))
             cls.COMBINATIONS_COVER_TESTS.append(test_name)
 
     @staticmethod

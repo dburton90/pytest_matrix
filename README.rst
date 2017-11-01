@@ -323,11 +323,11 @@ test_combcover_fx_x_y FAILED OR PASSED according to scope
 ---------------------------------------------------------
 
 There are two type of scopes which combcover can use when looking for all types of fixtures.
-- *functions* scope:
-    - default scope
-    - the combcover will look for fixture types only in these **_FIXTURES** from functions define in combcover config
 - *class* scope:
-    - the combcover will look in ALL **_FIXTURES**
+    - default scope
+    - the combcover will look in ALL **_FIXTURES** defined in same class
+- *functions* scope:
+    - the combcover will look for fixture types only in these **_FIXTURES** from functions define in combcover config
 
 .. code:: python
 
@@ -358,7 +358,7 @@ There are two type of scopes which combcover can use when looking for all types 
             {
                 "fixture_names": ['x', 'y'],
                 "fixture_functions": ['fx'],
-                "scope": 'class',
+                "scope": 'class',  # this is not required *class* is default scope
             }
         ]
         # rest of the class...
@@ -367,6 +367,42 @@ There are two type of scopes which combcover can use when looking for all types 
 The test will find all types of **x** *('a', 'b')* and **y** *('c', 'd')* in **ALL** fixtures, combine them *([x_a|y_c], [x_b|y_c], [x_a|y_d], [x_b|y_d])* and compare them with combinations manually defined in **FX_FIXTURES** configuration *([x_b|y_d])*. The result of the test will be **FAILED** and missing combinations will be: *[x_a|y_c], [x_b|y_c], [x_a|y_d]*
 
 If you remove the *scope* key from **COMBINATIONS_COVER** the test will be **PASSED**, because combcover will be looking for only for fixtures type defined in **FX_FIXTURES** *(x_a and y_d)*.
+
+.. code:: python
+
+    class TestCombinations(TestMatrixMixin):
+        FN_FIXTURES = [
+            {
+                'x': ['a', 'b'],
+                'y': ['c'],
+            },
+            {
+                'x': ['a'],
+                'y': ['d'],
+            }
+        ]
+        FN_FIXTURES_NAMES = ['x', 'y']
+
+        FX_FIXTURES = [
+            {
+                'x': ['b'],
+                'y': ['d'],
+                'z': ['j', 'k']
+            }
+        ]
+        FX_FIXTURES_NAMES = ['x', 'y', 'z']
+
+        # **COMBINATIONS**
+        COMBINATIONS_COVER = [
+            {
+                "fixture_names": ['x', 'y'],
+                "fixture_functions": ['fx'],
+                "scope": 'functions',  # this is required
+            }
+        ]
+        # rest of the class...
+
+This combocover test will PASS
 
 
 TODO:

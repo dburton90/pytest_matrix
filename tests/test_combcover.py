@@ -71,16 +71,16 @@ def test_combination_function_passed(combination_test_mixin):
                 "fixture_functions": ['fn', 'fx'],
             },
             {
-                "fixture_names": ['x', 'y', 'z'],
+                "fixture_names": ['z'],
                 "fixture_functions": ['fx'],
             },
         ]
 
     assert hasattr(TestMyTest, 'test_combocover_fn_fx_x_y')
-    assert hasattr(TestMyTest, 'test_combocover_fx_x_y_z')
+    assert hasattr(TestMyTest, 'test_combocover_fx_z')
     inst = TestMyTest()
     assert inst.test_combocover_fn_fx_x_y() is None
-    assert inst.test_combocover_fx_x_y_z() is None
+    assert inst.test_combocover_fx_z() is None
 
 
 def test_combination_function_failed(combination_test_mixin):
@@ -121,15 +121,60 @@ def test_combination_function_failed(combination_test_mixin):
     assert hasattr(TestMyTest, 'test_combocover_fn_x_y')
     assert hasattr(TestMyTest, 'test_combocover_fx_x_y_z')
     inst = TestMyTest()
-    assert inst.test_combocover_fx_x_y_z() is None
     with pytest.raises(AssertionError) as exec_info:
         inst.test_combocover_fn_x_y()
     exec_info = str(exec_info.exconly())
     assert "Missing combinations" in exec_info
     assert "[x_b|y_d]" in exec_info
+    with pytest.raises(AssertionError) as exec_info:
+        inst.test_combocover_fx_x_y_z()
 
 
-def test_combination_function_failed_in_class_scope(combination_test_mixin):
+def test_combination_function_scope_failed(combination_test_mixin):
+    class TestMyTest(combination_test_mixin):
+        FN_FIXTURES = [
+            {
+                'x': ['a', 'b'],
+                'y': ['c'],
+            },
+            {
+                'x': ['a'],
+                'y': ['d'],
+            }
+        ]
+        FN_FIXTURES_NAMES = ['x', 'y']
+
+        FX_FIXTURES = [
+            {
+                'x': ['b'],
+                'y': ['d'],
+                'z': ['j', 'k']
+            }
+        ]
+        FX_FIXTURES_NAMES = ['x', 'y', 'z']
+
+        COMBINATIONS_COVER = [
+            {
+                "fixture_names": ['x', 'y', 'z'],
+                "fixture_functions": ['fx'],
+            },
+        ]
+
+    assert hasattr(TestMyTest, 'test_combocover_fx_x_y_z')
+    inst = TestMyTest()
+    with pytest.raises(AssertionError) as exec_info:
+        inst.test_combocover_fx_x_y_z()
+    exec_info = str(exec_info.exconly())
+    assert "Missing combinations" in exec_info
+    assert "[x_a|y_c|z_j]" in exec_info
+    assert "[x_a|y_c|z_k]" in exec_info
+    assert "[x_b|y_c|z_j]" in exec_info
+    assert "[x_b|y_c|z_k]" in exec_info
+    assert "[x_a|y_d|z_j]" in exec_info
+    assert "[x_a|y_d|z_k]" in exec_info
+
+
+def test_combination_function_passed_in_function_scope(combination_test_mixin):
 
     class TestMyTest(combination_test_mixin):
         FN_FIXTURES = [
@@ -161,24 +206,15 @@ def test_combination_function_failed_in_class_scope(combination_test_mixin):
             {
                 "fixture_names": ['x', 'y', 'z'],
                 "fixture_functions": ['fx'],
-                "scope": 'class'
+                "scope": combination_test_mixin.FUNCTIONS_SCOPE
             },
         ]
 
-    assert hasattr(TestMyTest, 'test_combocover_fx_x_y_z')
+    assert hasattr(TestMyTest, 'test_combocover_fx_fn_x_y')
     assert hasattr(TestMyTest, 'test_combocover_fx_x_y_z')
     inst = TestMyTest()
-    with pytest.raises(AssertionError) as exec_info:
-        inst.test_combocover_fx_x_y_z()
-    missing = [
-        "[x_a|y_c|z_j]",
-        "[x_a|y_c|z_k]",
-        "[x_b|y_c|z_j]",
-        "[x_b|y_c|z_k]",
-        "[x_a|y_d|z_j]",
-        "[x_a|y_d|z_k]",
-    ]
-    assert "Missing combinations:\n" + "\n".join(missing) == str(exec_info.exconly(True))
+    assert inst.test_combocover_fx_x_y_z() is None
+    assert inst.test_combocover_fx_fn_x_y() is None
 
 
 @pytest.mark.parametrize(argnames=['names'],
