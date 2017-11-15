@@ -1,4 +1,5 @@
 import pytest
+from pytest_lazyfixture import is_lazy_fixture
 
 from pytest_matrix.mixin import MatrixTestBase, FixtureGrouper
 
@@ -42,6 +43,15 @@ def pytest_pycollect_makeitem(collector, name, obj):
 #     config.addinivalue_line("markers",
 #                             'matrix(names, combs): Create cartesian product from list of combs.')
 
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_fixture_setup(fixturedef, request):
+    outcome = yield
+    result = outcome.get_result()
+    if is_lazy_fixture(result):
+        result = request.getfixturevalue(result.name)
+        fixturedef.cached_result = (result, request.param_index, None)
+    return result
 
 
 def get_paramatrized_data(cls, function_name, all_fixtures):
