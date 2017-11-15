@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name="pytest_matrix",
-      version=0.3,
+      version=0.4,
       description='Provide tools for generating tests from combinations of fixtures.',
       long_description='This plugin provide simple way how to generate multiple test from combinations of setup data.',
       url="https://github.com/dburton90/pytest_matrix.git",
