@@ -191,7 +191,7 @@ class FixtureGrouper(list):
                                           for g in super().__iter__()))
         for comb in fixture_combs:
             ids, fixtures = zip(*((name, pytest.lazy_fixture(name)) for name in comb))
-            ids = "|".join(ids)
+            ids = "|".join(sorted(ids))
             yield ids, fixtures
 
     def __add__(self, other):

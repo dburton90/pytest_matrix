@@ -39,11 +39,6 @@ def pytest_pycollect_makeitem(collector, name, obj):
             return []
 
 
-# def pytest_load_initial_conftest(config):
-#     config.addinivalue_line("markers",
-#                             'matrix(names, combs): Create cartesian product from list of combs.')
-
-
 @pytest.hookimpl(hookwrapper=True)
 def pytest_fixture_setup(fixturedef, request):
     outcome = yield
