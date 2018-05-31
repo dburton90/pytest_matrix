@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
--e file:///home/daniel/projects/pytest_matrix
+-e .
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
 chardet==3.0.4            # via requests
