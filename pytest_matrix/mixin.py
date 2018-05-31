@@ -63,6 +63,25 @@ class MatrixTestBase(type):
                     all_fixtures[fixture_name].update(set(types))
         all_fixtures.default_factory = None
 
+        def wrapper(fixture_names, test_functions, scope, test_name):
+            def test_combocover(self):
+                filtered_groups = [all_groupers[name] for name in test_functions]
+                selected_groups = sum(filtered_groups[1:], filtered_groups[0])
+                selected_groups = FixtureGrouper(fixture_names, selected_groups)
+                if scope == cls.FUNCTIONS_SCOPE:
+                    group_expected = {fixture_name: selected_groups.get_fixture_types(fixture_name)
+                                      for fixture_name in fixture_names}
+                else:
+                    group_expected = all_fixtures
+
+                all_combs_grouper = FixtureGrouper(fixture_names, [group_expected])
+
+                difference = sorted(all_combs_grouper.difference(selected_groups))
+                assert not any(difference), "Missing combinations:\n" + '\n'.join(difference)
+            test_combocover.__name__ = test_name
+            test_combocover._combocover = True
+            return test_combocover
+
         for comb_conf in cls.COMBINATIONS_COVER:
             f_names = comb_conf['fixture_names']
             t_functions = comb_conf['fixture_functions']
@@ -73,25 +92,7 @@ class MatrixTestBase(type):
                 fixture_names="_".join(f_names)
             )
 
-            def wrapper(fixture_names, test_functions, scope):
-                def test_combocover(self):
-                    filtered_groups = [all_groupers[name] for name in test_functions]
-                    selected_groups = sum(filtered_groups[1:], filtered_groups[0])
-                    selected_groups = FixtureGrouper(fixture_names, selected_groups)
-                    if scope == cls.FUNCTIONS_SCOPE:
-                        group_expected = {fixture_name: selected_groups.get_fixture_types(fixture_name)
-                                          for fixture_name in fixture_names}
-                    else:
-                        group_expected = all_fixtures
-
-                    all_combs_grouper = FixtureGrouper(fixture_names, [group_expected])
-
-                    difference = all_combs_grouper.difference(selected_groups)
-                    assert not any(difference), "Missing combinations:\n" + '\n'.join(difference)
-                test_combocover.__name__ = test_name
-                test_combocover._combocover = True
-                return test_combocover
-            setattr(cls, test_name, wrapper(f_names, t_functions, test_scope))
+            setattr(cls, test_name, wrapper(f_names, t_functions, test_scope, test_name))
             cls.COMBINATIONS_COVER_TESTS.append(test_name)
 
     @staticmethod
