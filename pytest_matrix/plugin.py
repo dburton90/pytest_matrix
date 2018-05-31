@@ -7,7 +7,12 @@ from pytest_matrix.mixin import MatrixTestBase, FixtureGrouper
 def pytest_generate_tests(metafunc):
     marker = None
     try:
-        marker = metafunc.function.matrix
+        markers = metafunc.function.pytestmark
+        markers = [m for m in markers if m.name == 'matrix']
+        if len(markers) > 1:
+            raise ValueError("{metafunc.definition.nodeid} was marked 'matrix' more than one")
+        elif markers:
+            marker = markers[0]
     except AttributeError:
         pass
     if marker is not None:

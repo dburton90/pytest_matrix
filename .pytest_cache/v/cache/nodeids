@@ -1,0 +1,21 @@
+[
+  "tests/test_combcover.py::test_combination_function_passed",
+  "tests/test_combcover.py::test_combination_function_failed",
+  "tests/test_combcover.py::test_combination_function_scope_failed",
+  "tests/test_combcover.py::test_combination_function_passed_in_function_scope",
+  "tests/test_combcover.py::test_invalid_fixture_names[names0]",
+  "tests/test_combcover.py::test_invalid_fixture_names[names1]",
+  "tests/test_combcover.py::test_invalid_fixture_names[names2]",
+  "tests/test_combcover.py::test_invalid_fixture_names[names3]",
+  "tests/test_combcover.py::test_exclude_generated_test_combinations",
+  "tests/test_generate.py::test_generate",
+  "tests/test_generate.py::test_generate_from_marker",
+  "tests/test_generate.py::test_missing_fixture_names",
+  "tests/test_generate.py::test_missing_fixtures_definition",
+  "tests/test_generate.py::test_missing_fixture_names_inherited",
+  "tests/test_generate.py::test_missing_fixtures_definition_inherited",
+  "tests/test_generate.py::test_invalid_fixtures_keys[more]",
+  "tests/test_generate.py::test_invalid_fixtures_keys[less]",
+  "tests/test_generate.py::test_not_generate",
+  "tests/test_generate.py::test_skip"
+]
