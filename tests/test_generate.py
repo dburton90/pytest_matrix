@@ -239,4 +239,39 @@ def test_skip(testdir):
                                                          ('test_fn', "TestFirst")}
 
 
+@pytest.mark.parametrize(
+    'variable, result', (('#1', 1), ('@1_0', '"1_0"'), ('normal_fixture', '"fixture_val"'))
+)
+def test_simple_fixture(testdir, variable, result):
 
+    source = """
+    import pytest
+    from pytest_matrix import TestMatrixMixin
+    
+    
+    @pytest.fixture
+    def x_attr_normal_fixture():
+        return 'fixture_val'
+            
+    
+    @pytest.mark.matrix(names=['x_attr'], combs=[
+            {{
+                'x_attr': ['{variable}']
+            }}
+        ])
+    def test_my_fn(x_attr):
+        assert x_attr == {result}
+    
+
+    class TestMixin(TestMatrixMixin):
+        FN_FIXTURES = [{{'x_attr': ['{variable}']}}]
+        FN_FIXTURES_NAMES = ['x_attr']
+
+        def test_fn(self, x_attr):
+            assert x_attr == {result}
+
+    """.format_map(vars())
+    path = testdir.makepyfile(source)
+    result = testdir.runpytest(str(path))
+
+    result.assert_outcomes(skipped=0, failed=0, passed=2)

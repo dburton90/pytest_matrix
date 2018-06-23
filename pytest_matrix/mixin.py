@@ -169,6 +169,12 @@ class TestMatrixMixin(metaclass=MatrixTestBase):
 
 class FixtureGrouper(list):
 
+    SIMPLE_FIXTURE_MAPPER = {
+        '#': int,
+        '@': str,
+    }
+    SIMPLE_FIXTURE_REGEX = re.compile('.+_([#@])(.+)'.format(vars=''.join(SIMPLE_FIXTURE_MAPPER.keys())))
+
     def __init__(self, fixture_names, *args, **kwargs):
         if not (isinstance(fixture_names, list), isinstance(fixture_names, tuple)):
             raise TypeError("fixture_names must be instance of 'list' or 'tuple', not: "
@@ -191,9 +197,17 @@ class FixtureGrouper(list):
         fixture_combs = itertools.chain(*(generate_single_group_name_combinations(g, fixture_names)
                                           for g in super().__iter__()))
         for comb in fixture_combs:
-            ids, fixtures = zip(*((name, pytest.lazy_fixture(name)) for name in comb))
+            ids, fixtures = zip(*map(self.create_fixture_for_name, comb))
             ids = "|".join(sorted(ids))
             yield ids, fixtures
+
+    def create_fixture_for_name(self, name):
+        simple_fixture = self.SIMPLE_FIXTURE_REGEX.match(name)
+        if simple_fixture:
+            code, name = simple_fixture.groups()
+            return name, self.SIMPLE_FIXTURE_MAPPER[code](name)
+        else:
+            return name, pytest.lazy_fixture(name)
 
     def __add__(self, other):
         return FixtureGrouper(self.fixture_names, super().__add__(other))

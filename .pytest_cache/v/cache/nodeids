@@ -17,5 +17,8 @@
   "tests/test_generate.py::test_invalid_fixtures_keys[more]",
   "tests/test_generate.py::test_invalid_fixtures_keys[less]",
   "tests/test_generate.py::test_not_generate",
-  "tests/test_generate.py::test_skip"
+  "tests/test_generate.py::test_skip",
+  "tests/test_generate.py::test_simple_fixture[#1-1]",
+  "tests/test_generate.py::test_simple_fixture[@1_0-\"1_0\"]",
+  "tests/test_generate.py::test_simple_fixture[normal_fixture-\"fixture_val\"]"
 ]

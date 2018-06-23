@@ -170,6 +170,28 @@ Example:
             # par is either value of par_a or par_b, it depends on test
 
 
+Simple Fixtures
+---------------
+There are two simple fixtures types: String (with prefix '@') and Integer  (with prefix '#')
+
+.. code:: Python
+
+    import pytest
+    from myproject import my_func
+
+        @pytest.mark.matrix(names=['arg_firs'],
+                            combs=[
+                                    {
+                                       'arg_first': ['#1', '@2'],
+                                    },
+                                   ])
+        def test_my_fn(self, arg_first):
+            assert arg_first in (1, '2')
+
+
+There is no need to define fixtures arg_first_#1 (returning int(1)), arg_first_@2 (returning str(2)). It is impossible have functions (fixture definition) with these names in python anyway :).
+
+
 Test Generator
 --------------
 The test are generated for cartesian product of defined fixture_names.
