@@ -6,9 +6,7 @@ This plugin provide simple way how to generate multiple test from combinations f
 Instalition
 -----------
 
-.. code:: Bash
-    pip install pytest_matrix
-
+``pip install pytest_matrix``
 
 Quickstart:
 =============
