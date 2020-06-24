@@ -140,6 +140,7 @@ class TestMatrixMixin(metaclass=MatrixTestBase):
             {
                 'arg_first': ['val_1', 'val_2'],
             }
+        ]
 
         @pytest.fixtures
         def arg_first_val_1(self):

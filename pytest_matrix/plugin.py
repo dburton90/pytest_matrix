@@ -30,6 +30,9 @@ def pytest_generate_tests(metafunc):
             metafunc.parametrize(**parametrize_data)
 
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "matrix: for fixture matrix combinations")
+
 
 def pytest_itemcollected(item):
     if isinstance(item.cls, MatrixTestBase) and item.name in item.cls.SKIP_TESTS:

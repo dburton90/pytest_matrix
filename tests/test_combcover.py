@@ -217,13 +217,14 @@ def test_combination_function_passed_in_function_scope(combination_test_mixin):
     assert inst.test_combocover_fx_fn_x_y() is None
 
 
+@pytest.mark.skip("Not implemented yet.")
 @pytest.mark.parametrize(argnames=['names'],
                          argvalues=[
                              (('fn', 'not_existing'), ),
                              (('not_existing'), ),
                              ((), ),
                          ])
-def test_invalid_fixture_names(names):
+def test_invalid_fixture_functions(names):
 
     with pytest.raises(exceptions.InvalidCombinationsFixtureFunctions):
         class Test(TestMatrixMixin):
