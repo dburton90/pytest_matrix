@@ -4,9 +4,43 @@ python:
   - "3.7"
   - "3.8"
   - "nightly"
-# command to install dependencies
-install:
-  - poetry install
-# command to run tests
-script:
-  - pytest # or py.test for Python versions 3.5 and below
+
+stages:
+  - test
+  - name: deploy
+    if: tag IS present
+
+cache:
+  pip: true
+  directories:
+    - "$HOME/.cache/pre-commit"
+
+jobs:
+  include:
+    - stage: test
+      install:
+        - pip install --upgrade pip
+        - pip install poetry
+        - poetry install -v
+      script:
+        - pytest
+    - stage: deploy
+      script:
+        - echo Deploying to PyPI...
+
+before_deploy:
+  # User and password environment variables are set as hidden variables through
+  # the web interface in the project settings.
+  - pip install --upgrade pip
+  - pip install poetry
+  - poetry config pypi-token.pypi $PYPI_TOKEN
+  - poetry build
+
+deploy:
+  provider: script
+  script: poetry publish
+  skip_cleanup: true
+  on:
+    all_branches: true  # Travis recognizes tag names as "branches"
+    condition: $TRAVIS_BUILD_STAGE_NAME = Deploy
+    tags: true

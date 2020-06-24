@@ -1,12 +1,24 @@
 [tool.poetry]
 name = "pytest_matrix"
 version = "0.7.0"
-description = "matrix combinations for pytest fixtures"
+description = "Provide tools for generating tests from combinations of fixtures."
 authors = ["dburton90 <daniel.barton@seznam.cz>"]
 license = "GPL-3.0"
+repository = "https://github.com/dburton90/pytest_matrix.git"
+readme = "README.rst"
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Plugins',
+    'Framework :: Pytest',
+    'Topic :: Software Development :: Testing',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Programming Language :: Python :: 3 :: Only',
+    'Topic :: Software Development :: Libraries',
+]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 pytest-lazy-fixture = "^0.6.3"
 pytest = "^5.4.3"
 
@@ -15,3 +27,6 @@ pytest = "^5.4.3"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.poetry.plugins."pytest11"]
+"matrix" = "pytest_matrix.plugin"

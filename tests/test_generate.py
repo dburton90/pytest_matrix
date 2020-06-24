@@ -234,9 +234,9 @@ def test_skip(testdir):
 
     result.assert_outcomes(skipped=1, passed=1)
 
-    # items = testdir.getitems(source)
-    # assert {(f.name, f.cls.__name__) for f in items} == {('test_fn[y_x]', 'TestOtherTest'),
-    #                                                      ('test_fn', "TestFirst")}
+    items = testdir.getitems(source)
+    assert {(f.name, f.cls.__name__) for f in items} == {('test_fn[y_x]', 'TestOtherTest'),
+                                                         ('test_fn', "TestFirst")}
 
 
 @pytest.mark.parametrize(
