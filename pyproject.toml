@@ -23,6 +23,7 @@ pytest-lazy-fixture = "^0.6.3"
 pytest = "^5.4.3"
 
 [tool.poetry.dev-dependencies]
+pygments = "^2.6.1"
 
 [tool.poetry.plugins."pytest11"]
 "matrix" = "pytest_matrix.plugin"

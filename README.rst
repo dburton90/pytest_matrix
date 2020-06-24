@@ -1,7 +1,7 @@
 Pytest Matrix
 ^^^^^^^^^^^^^
 
-This plugin provide simple way how to generate multiple test from combinations from setup data.
+Easy fixture combinations.
 
 Instalition
 -----------
@@ -99,7 +99,7 @@ Test Data
 
 Every test function must be prefixed with '**test_**'
 For every test function must be defined two class attributes. If test function is named 'test_**my_function**',
-there must be defined **MY_FUNCTION**_FIXTURES_NAMES and **MY_FUNCTION**_FIXTURES lists.
+there must be defined **MY_FUNCTION_FIXTURES_NAMES** and **MY_FUNCTION_FIXTURES** lists.
 You must define them in every class (they are not inherited).
 
 MY_FUNCTION_FIXTURES_NAMES:
@@ -288,7 +288,7 @@ This will skip:
 - RealTest.test_a
 - DeeperInheritanceTest.test_b
 
-Armnd run these tests:
+And run these tests:
 --------------------
 - RealTest.test_b
 - DeeperInheritanceTest.test_a[par_a]
@@ -389,11 +389,11 @@ test_combcover_fx_x_y FAILED OR PASSED according to scope
 ---------------------------------------------------------
 
 There are two type of scopes which combcover can use when looking for all types of fixtures.
-- *class* scope:
-    - default scope
-    - the combcover will look in ALL **_FIXTURES** defined in same class
-- *functions* scope:
-    - the combcover will look for fixture types only in these **_FIXTURES** from functions define in combcover config
+    - *class* scope:
+        - default scope
+        - the combcover will look in ALL **_FIXTURES** defined in same class
+    - *functions* scope:
+        - the combcover will look for fixture types only in these **_FIXTURES** from functions define in combcover config
 
 .. code:: python
 
