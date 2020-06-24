@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest_matrix"
-version = "0.7.4"
+version = "0.7.5"
 description = "Provide tools for generating tests from combinations of fixtures."
 authors = ["dburton90 <daniel.barton@seznam.cz>"]
 license = "GPL-3.0"
