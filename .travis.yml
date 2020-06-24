@@ -10,25 +10,16 @@ stages:
 jobs:
   include:
     - stage: test
-      install:
-        - pip install --upgrade pip
-        - pip install poetry
-        - poetry install -v
       script:
+        - poetry install -v
         - pytest
     - stage: deploy
       script:
-        - echo Deploying to PyPI...
+        - poetry config pypi-token.pypi $PYPI_TOKEN
+        - poetry build
+        - poetry publish
 
-before_deploy:
-  # User and password environment variables are set as hidden variables through
-  # the web interface in the project settings.
+install:
   - pip install --upgrade pip
   - pip install poetry
-  - poetry config pypi-token.pypi $PYPI_TOKEN
-  - poetry build
 
-deploy:
-  provider: script
-  script: poetry publish
-  skip_cleanup: true
