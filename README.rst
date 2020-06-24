@@ -1,5 +1,5 @@
 Pytest Matrix
-^^^^^^^^^^^^
+^^^^^^^^^^^^^
 
 This plugin provide simple way how to generate multiple test from combinations from setup data.
 
