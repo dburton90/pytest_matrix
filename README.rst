@@ -16,7 +16,7 @@ Quickstart:
     import pytest
     from myproject import my_func
 
-        @pytest.mark.matrix(names=['arg_firs'],
+        @pytest.mark.matrix(names=['arg_first'],
                             combs=[
                                     {
                                        'arg_first': ['val_1', 'val_2'],
